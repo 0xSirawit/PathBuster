@@ -7,13 +7,34 @@ FILTER_STATUS_CODE = {404}
 RESULT = []
 
 
+class bcolors:
+    HEADER = "\033[95m"
+    OKBLUE = "\033[94m"
+    OKCYAN = "\033[96m"
+    OKGREEN = "\033[92m"
+    WARNING = "\033[93m"
+    FAIL = "\033[91m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
+
+
 async def fetch(session, guess_url):
     global error
     try:
         async with session.get(guess_url) as response:
             if response.status not in FILTER_STATUS_CODE:
-                print((guess_url, response.status))
-                RESULT.append((guess_url, response.status))
+                if response.status == 200:
+                    print(
+                        f"{bcolors.OKGREEN}{response.status}{bcolors.ENDC} {guess_url} {response.content_length}"
+                    )
+                elif response.status == 403:
+                    print(
+                        f"{bcolors.WARNING}{response.status}{bcolors.ENDC} {guess_url} {response.content_length}"
+                    )
+                else:
+                    print(f"{response.status} {guess_url} {response.content_length}")
+                RESULT.append((response.status, guess_url, response.content_length))
     except:
         error += 1
 
@@ -41,12 +62,10 @@ if __name__ == "__main__":
     parser.add_argument("--url", help="Target URL for brute-force path discovery")
     parser.add_argument("--wordlist", help="wordlist")
     args = parser.parse_args()
-    url = args.url
+    url = args.url.rstrip("/")
     error = 0
 
     start_time = time.time()
-    if url.endswith("/"):
-        url = url[:-1]
     asyncio.run(brute(url, read_wordlist(args.wordlist)))
     end_time = time.time()
 

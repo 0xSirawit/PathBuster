@@ -3,7 +3,8 @@ import aiohttp
 import asyncio
 import time
 
-FILTER_STATUS_CODE = [404]
+FILTER_STATUS_CODE = {404}
+RESULT = []
 
 
 async def fetch(session, guess_url):
@@ -11,7 +12,8 @@ async def fetch(session, guess_url):
     try:
         async with session.get(guess_url) as response:
             if response.status not in FILTER_STATUS_CODE:
-                print(response.status, guess_url)
+                print((guess_url, response.status))
+                RESULT.append((guess_url, response.status))
     except:
         error += 1
 
@@ -27,11 +29,11 @@ async def brute(url, wordlist):
 def read_wordlist(filename):
     try:
         with open(filename, "r", encoding="utf-8") as f:
-            WORDLIST = f.readlines()
+            wordlist = f.read().splitlines()
     except FileNotFoundError:
         print("Error: Wordlist file not found!")
         exit(1)
-    return WORDLIST
+    return wordlist
 
 
 if __name__ == "__main__":
@@ -43,6 +45,8 @@ if __name__ == "__main__":
     error = 0
 
     start_time = time.time()
+    if url.endswith("/"):
+        url = url[:-1]
     asyncio.run(brute(url, read_wordlist(args.wordlist)))
     end_time = time.time()
 

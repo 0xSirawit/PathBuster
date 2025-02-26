@@ -65,9 +65,12 @@ if __name__ == "__main__":
     url = args.url.rstrip("/")
     error = 0
 
-    start_time = time.time()
-    asyncio.run(brute(url, read_wordlist(args.wordlist)))
-    end_time = time.time()
-
-    print(error, "errors")
-    print(end_time - start_time)
+    try:
+        start_time = time.time()
+        asyncio.run(brute(url, read_wordlist(args.wordlist)))
+    except KeyboardInterrupt:
+        pass
+    finally:
+        end_time = time.time()
+        print(f"Total errors: {error}")
+        print(f"Execution time: {end_time - start_time:.2f} seconds")
